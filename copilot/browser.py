@@ -191,8 +191,11 @@ class BrowserCopilot:
             self._page = self._context.pages[0] if self._context.pages else self._context.new_page()
             self._page.set_default_timeout(self.nav_timeout * 1000)
             self._page.goto(COPILOT_URL, wait_until="domcontentloaded")
-            # Give Cloudflare a moment to clear on first paint.
-            self._page.wait_for_load_state("networkidle", timeout=self.nav_timeout * 1000)
+            # Give Cloudflare a moment to clear on first paint. We deliberately do
+            # NOT wait for "networkidle": Copilot's SPA keeps telemetry/heartbeat
+            # connections open indefinitely, so the network never goes idle and the
+            # wait would always time out. A short fixed settle is enough.
+            self._page.wait_for_timeout(2000)
         except PlaywrightError as exc:
             self.close()
             raise ConnectionError(f"Failed to start browser: {exc}") from exc
