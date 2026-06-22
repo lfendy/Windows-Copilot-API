@@ -79,6 +79,26 @@ That's it. Your session is saved under `session/` (git-ignored, never shared) an
 
 ---
 
+## Run with Docker (optional)
+
+Prefer a container? You can run the OpenAI-compatible server in Docker once you've signed in.
+
+> **Sign in on the host first.** The login step above opens a *visible* browser, which can't run inside the headless container — so run `python -m copilot login` on your host to populate `session/`. The container mounts that folder and only does the automatic (headless) token refresh from then on.
+
+```bash
+docker compose up --build
+# -> Copilot OpenAI-compatible API on http://localhost:8000
+```
+
+The [docker-compose.yml](docker-compose.yml) maps port `8000` and bind-mounts your `session/` so the login persists across restarts. Tune `RATE_LIMIT_RPM` / `RATE_LIMIT_BURST` there. To run without Compose, build and pass the same bindings by hand:
+
+```bash
+docker build -t windows-copilot-api .
+docker run --rm -p 8000:8000 -v "$(pwd)/session:/app/session" windows-copilot-api
+```
+
+---
+
 ## Usage 1: In Python (no server)
 
 The simplest way if your code is already Python.
